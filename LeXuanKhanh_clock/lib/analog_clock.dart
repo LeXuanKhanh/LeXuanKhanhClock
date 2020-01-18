@@ -33,7 +33,8 @@ class AnalogClock extends StatefulWidget {
   _AnalogClockState createState() => _AnalogClockState();
 }
 
-class _AnalogClockState extends State<AnalogClock>  with TickerProviderStateMixin {
+class _AnalogClockState extends State<AnalogClock>
+    with TickerProviderStateMixin {
   var _now = DateTime.now();
   var _temperature = '';
   var _temperatureRange = '';
@@ -59,14 +60,16 @@ class _AnalogClockState extends State<AnalogClock>  with TickerProviderStateMixi
   void initState() {
     super.initState();
 
-    controller = new AnimationController(
-        duration: Duration(seconds: 10), vsync: this)..addListener(() =>
-        setState(() {}));
+    controller =
+        new AnimationController(duration: Duration(seconds: 10), vsync: this)
+          ..addListener(() => setState(() {}));
 
-    radianAnim = Tween(begin: _now.second.toDouble(), end: _now.second.toDouble() + 60.0).animate(controller);
+    radianAnim =
+        Tween(begin: _now.second.toDouble(), end: _now.second.toDouble() + 60.0)
+            .animate(controller);
 
-
-    colorAnim = TweenSequence<Color>(listTweenSequenceItemOf(colors)).animate(controller);
+    colorAnim = TweenSequence<Color>(listTweenSequenceItemOf(colors))
+        .animate(controller);
 
     controller.repeat();
 
@@ -76,8 +79,8 @@ class _AnalogClockState extends State<AnalogClock>  with TickerProviderStateMixi
     _updateModel();
   }
 
-
-  static List<TweenSequenceItem<Color>> listTweenSequenceItemOf(List<Color> colors) {
+  static List<TweenSequenceItem<Color>> listTweenSequenceItemOf(
+      List<Color> colors) {
     final l = List<TweenSequenceItem<Color>>(colors.length);
     for (int i = 0; i < colors.length; i++) {
       final a = colors[i];
@@ -108,9 +111,6 @@ class _AnalogClockState extends State<AnalogClock>  with TickerProviderStateMixi
       _temperature = widget.model.temperatureString;
       _temperatureRange = '(${widget.model.low} - ${widget.model.highString})';
       _condition = widget.model.weatherString;
-//      switch (widget.model.weatherCondition) {
-//        case WeatherCondition.
-//      }
       _location = widget.model.location;
     });
   }
@@ -125,6 +125,22 @@ class _AnalogClockState extends State<AnalogClock>  with TickerProviderStateMixi
         _updateTime,
       );
     });
+  }
+
+  Widget numberText(String text, Alignment alignment) {
+    return Align(
+      alignment: alignment,
+      child: Padding(
+        padding: const EdgeInsets.all(4.0),
+        child: Text(
+          text,
+          style: TextStyle(
+              color: Colors.white,
+              fontSize: 35,
+              shadows: [Shadow(color: colorAnim.value, blurRadius: 20)]),
+        ),
+      ),
+    );
   }
 
   @override
@@ -155,13 +171,17 @@ class _AnalogClockState extends State<AnalogClock>  with TickerProviderStateMixi
 
     final time = DateFormat.Hms().format(DateTime.now());
     final weatherInfo = DefaultTextStyle(
-      style: TextStyle(color: customTheme.primaryColor),
+      style: TextStyle(
+          color: Colors.white,
+          fontSize: 15,
+          shadows: [Shadow(color: Colors.white, blurRadius: 20)]
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(_temperature),
+          // https://rive.app/a/superatom/files/flare/weather-icon/preview
           Text(_temperatureRange),
-          Text(_condition),
           Text(_location),
         ],
       ),
@@ -173,90 +193,120 @@ class _AnalogClockState extends State<AnalogClock>  with TickerProviderStateMixi
         value: time,
       ),
       child: Container(
-        color: customTheme.backgroundColor,
-        child: Stack(
-          children: [
-            Column(
-              children: <Widget>[
-                Container(
-                    width: 100,
-                    height: 100,
-                    child: FlareActor("assets/thunderstorm.flr", alignment:Alignment.center, fit:BoxFit.contain, animation: "go")
+          color: customTheme.backgroundColor,
+          child: LayoutBuilder(
+            builder: (context, constraints) => Stack(
+              children: [
+                numberText("12", Alignment.topCenter),
+                numberText("3", Alignment.centerRight),
+                numberText("6", Alignment.bottomCenter),
+                numberText("9", Alignment.centerLeft),
+                Positioned(
+                  left: constraints.maxWidth / 2 - 58,
+                  top: constraints.maxHeight / 2 - 50,
+                  child: Container(
+                      margin: EdgeInsets.all(10),
+                      width: 100,
+                      height: 100,
+                      child: FlareActor("assets/weather.flr",
+                          alignment: Alignment.center,
+                          fit: BoxFit.cover,
+                          animation: _condition)),
                 ),
-                Container(
-                    width: 100,
-                    height: 100,
-                    child: FlareActor("assets/cloudy.flr", alignment:Alignment.center, fit:BoxFit.contain, animation: "go")
+                Center(
+                  child: Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white,
+                        boxShadow: [
+                          BoxShadow(
+                              color: Colors.white,
+                              spreadRadius: 5.0,
+                              blurRadius: 30)
+                        ]),
+                  ),
+                ),
+                ContainerHand(
+                  color: Colors.transparent,
+                  size: 0.5,
+                  angleRadians: radianAnim.value * radiansPerTick,
+                  child: Transform.translate(
+                    offset: Offset(0.0, -120.0),
+                    child: Container(
+                      width: 10,
+                      height: 250,
+                      decoration: BoxDecoration(
+                          borderRadius: new BorderRadius.only(
+                              topLeft: const Radius.circular(40.0),
+                              topRight: const Radius.circular(40.0)),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                                color: colorAnim.value,
+                                spreadRadius: 5.0,
+                                blurRadius: 30)
+                          ]),
+                    ),
+                  ),
+                ),
+                ContainerHand(
+                  color: Colors.transparent,
+                  size: 0.5,
+                  angleRadians: _now.minute * radiansPerTick,
+                  child: Transform.translate(
+                    offset: Offset(0.0, -100.0),
+                    child: Container(
+                      width: 10,
+                      height: 200,
+                      decoration: BoxDecoration(
+                          borderRadius: new BorderRadius.only(
+                              topLeft: const Radius.circular(40.0),
+                              topRight: const Radius.circular(40.0)),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.white,
+                                spreadRadius: 5.0,
+                                blurRadius: 30)
+                          ]),
+                    ),
+                  ),
+                ),
+                ContainerHand(
+                  color: Colors.transparent,
+                  size: 0.5,
+                  angleRadians: _now.hour * radiansPerHour +
+                      (_now.minute / 60) * radiansPerHour,
+                  child: Transform.translate(
+                    offset: Offset(0.0, -70.0),
+                    child: Container(
+                      width: 10,
+                      height: 150,
+                      decoration: BoxDecoration(
+                          borderRadius: new BorderRadius.only(
+                              topLeft: const Radius.circular(40.0),
+                              topRight: const Radius.circular(40.0)),
+                          color: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                                color: Colors.white,
+                                spreadRadius: 5.0,
+                                blurRadius: 30)
+                          ]),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: 0,
+                  bottom: 0,
+                  child: Padding(
+                      padding: const EdgeInsets.all(8), child: weatherInfo),
                 ),
               ],
             ),
-            ContainerHand(
-              color: Colors.transparent,
-              size: 0.5,
-              angleRadians: radianAnim.value * radiansPerTick,
-              child: Transform.translate(
-                offset: Offset(0.0, -60.0),
-                child: Container(
-                  width: 10,
-                  height: 150,
-                  decoration: BoxDecoration(
-                      borderRadius: new BorderRadius.only(
-                          topLeft: const Radius.circular(40.0),
-                          topRight: const Radius.circular(40.0)
-                      ),
-                      color: Colors.white,
-                      boxShadow: [
-                        BoxShadow(
-                            color: colorAnim.value,
-                            spreadRadius: 10.0,
-                            blurRadius: 30
-                        )
-                      ]),
-                ),
-              ),
-            ),
-//            ContainerHand(
-//              color: Colors.transparent,
-//              size: 0.5,
-//              angleRadians: _now.minute * radiansPerTick,
-//              child: Transform.translate(
-//                offset: Offset(0.0, -60.0),
-//                child: Container(
-//                  width: 32,
-//                  height: 150,
-//                  decoration: BoxDecoration(
-//                    color: customTheme.primaryColor,
-//                  ),
-//                ),
-//              ),
-//            ),
-//            ContainerHand(
-//              color: Colors.transparent,
-//              size: 0.5,
-//              angleRadians: _now.hour * radiansPerHour +
-//                  (_now.minute / 60) * radiansPerHour,
-//              child: Transform.translate(
-//                offset: Offset(0.0, -60.0),
-//                child: Container(
-//                  width: 32,
-//                  height: 150,
-//                  decoration: BoxDecoration(
-//                    color: customTheme.primaryColor,
-//                  ),
-//                ),
-//              ),
-//            ),
-            Positioned(
-              left: 0,
-              bottom: 0,
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: weatherInfo,
-              ),
-            ),
-          ],
-        ),
-      ),
+          )),
     );
   }
 }
