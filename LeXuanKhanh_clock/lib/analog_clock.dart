@@ -174,8 +174,7 @@ class _AnalogClockState extends State<AnalogClock>
       style: TextStyle(
           color: Colors.white,
           fontSize: 15,
-          shadows: [Shadow(color: Colors.white, blurRadius: 20)]
-      ),
+          shadows: [Shadow(color: Colors.white, blurRadius: 20)]),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
